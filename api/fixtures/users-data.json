@@ -1,0 +1,153 @@
+[{
+    "model": "api.position",
+    "fields": {
+      "address": "via tartini",
+      "latitude": 93.887,
+      "longitude": 87.453
+    }
+  },
+  {
+    "model": "api.position",
+    "fields": {
+      "address": "via derganino",
+      "latitude": 84.887,
+      "longitude":65.453
+    }
+  },
+  {
+    "model": "api.position",
+    "fields": {
+      "address": "via pasino",
+      "latitude": 56.887,
+      "longitude":45.453
+    }
+  },
+  {
+    "model": "api.store",
+    "fields": {
+    "store_id": 1,
+    "location": 1,
+    "max_customers": 5,
+    "current_customers": 1,
+    "name": "CONAD"
+    }
+  },
+  {
+    "model": "api.store",
+    "fields": {
+    "store_id": 2,
+    "location": 2,
+    "max_customers": 7,
+    "current_customers": 3,
+    "name": "CONAD"
+    }
+  },
+  {
+    "model": "api.store",
+    "fields": {
+    "store_id": 3,
+    "location": 3,
+    "max_customers": 6,
+    "current_customers": 2,
+    "name": "CONAD"
+    }
+  },
+  {
+    "model": "api.user",
+    "fields": {
+      "user_id":1,
+      "name": "vinay",
+      "phone_number": "329589238",
+      "email_address": "vinay@gmail.com",
+      "isManager": true,
+      "managed_store_id": [1]
+    }
+  },
+  {
+    "model": "api.user",
+    "fields": {
+      "user_id":2,
+      "name": "david",
+      "phone_number": "3295389238",
+      "email_address": "david@gmail.com",
+      "isManager": true,
+      "managed_store_id": [1,2]
+    }
+  },
+  {
+    "model": "api.user",
+    "fields": {
+      "user_id":3,
+      "name": "martin",
+      "phone_number": "+393888888888",
+      "email_address": "martin@gmail.com",
+      "isManager":true,
+      "managed_store_id": [1,2]
+
+    }
+  },
+    {
+    "model": "api.user",
+    "fields": {
+      "user_id":4,
+      "name": "marco",
+      "phone_number": "6542384923",
+      "email_address": "marco@gmail.com",
+      "isManager":true,
+      "managed_store_id":[2]
+    }
+  },
+  {
+    "model":"api.ticket",
+    "fields":{
+      "ticket_id": 1,
+    "created_at": "2021-01-27T19:18:00.036624Z",
+    "status": "New",
+    "time_of_request": "2021-01-27T20:21:00Z",
+    "time_of_entry": "2021-01-27T20:22:00Z",
+    "time_of_exit": "2021-01-27T20:23:00Z",
+    "assigned_to_user": 1,
+    "assigned_to_store": 1
+    }
+  },
+    {
+    "model":"api.ticket",
+    "fields":{
+      "ticket_id": 2,
+    "created_at": "2021-01-27T19:18:00.036624Z",
+    "status": "New",
+    "time_of_request": "2021-01-28T20:21:00Z",
+    "time_of_entry": "2021-01-28T20:22:00Z",
+    "time_of_exit": "2021-01-28T20:23:00Z",
+    "assigned_to_user": 1,
+    "assigned_to_store": 1
+    }
+  },
+    {
+    "model":"api.ticket",
+    "fields":{
+      "ticket_id": 3,
+    "created_at": "2021-01-27T19:18:00.036624Z",
+    "status": "New",
+    "time_of_request": "2021-01-28T21:21:00Z",
+    "time_of_entry": "2021-01-28T21:22:00Z",
+    "time_of_exit": "2021-01-28T21:23:00Z",
+    "assigned_to_user": 2,
+    "assigned_to_store": 2
+    }
+  },
+    {
+    "model":"api.ticket",
+    "fields":{
+      "ticket_id": 4,
+    "created_at": "2021-01-27T19:18:00.036624Z",
+    "status": "New",
+    "time_of_request": "2021-01-29T20:21:00Z",
+    "time_of_entry": "2021-01-29T20:22:00Z",
+    "time_of_exit": "2021-01-29T20:23:00Z",
+    "assigned_to_user": 3,
+    "assigned_to_store": 2
+    }
+  }
+
+]
