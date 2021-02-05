@@ -19,9 +19,29 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from django.core import serializers
 
 from rest_framework import permissions
-slots = {'9': {'0': {'slot_number': 0}, '30': {'slot_number': 1}}, '10': {'0': {'slot_number': 2}, '30': {'slot_number': 3}}, '11': {'0': {'slot_number': 4}, '30': {'slot_number': 5}}, '12': {'0': {'slot_number': 6}, '30': {'slot_number': 7}}, '13': {'0': {'slot_number': 8}, '30': {'slot_number': 9}}, '14': {'0': {'slot_number': 10}, '30': {'slot_number': 11}}, '15': {'0': {'slot_number': 12}, '30': {'slot_number': 13}}, '16': {'0': {'slot_number': 14}, '30': {'slot_number': 15}}, '17': {'0': {'slot_number': 16}, '30': {'slot_number': 17}}, '18': {'0': {'slot_number': 18}}}
+slots = {
+    '9': {'0': {'slot_number': 0},
+          '30': {'slot_number': 1}},
+    '10': {'0': {'slot_number': 2},
+           '30': {'slot_number': 3}},
+    '11': {'0': {'slot_number': 4},
+           '30': {'slot_number': 5}},
+    '12': {'0': {'slot_number': 6},
+           '30': {'slot_number': 7}},
+    '13': {'0': {'slot_number': 8},
+           '30': {'slot_number': 9}},
+    '14': {'0': {'slot_number': 10},
+           '30': {'slot_number': 11}},
+    '15': {'0': {'slot_number': 12},
+           '30': {'slot_number': 13}},
+    '16': {'0': {'slot_number': 14},
+           '30': {'slot_number': 15}},
+    '17': {'0': {'slot_number': 16},
+           '30': {'slot_number': 17}},
+    '18': {'0': {'slot_number': 18}}}
 
-slots_list = ['09:00', '09:10', '09:20', '09:30', '09:40', '09:50', '10:00', '10:10', '10:20', '10:30', '10:40', '10:50', '11:00', '11:10', '11:20', '11:30', '11:40', '11:50', '12:00', '12:10', '12:20', '12:30', '12:40', '12:50', '13:00', '13:10', '13:20', '13:30', '13:40', '13:50', '14:00', '14:10', '14:20', '14:30', '14:40', '14:50', '15:00', '15:10', '15:20', '15:30', '15:40', '15:50', '16:00', '16:10', '16:20', '16:30', '16:40', '16:50', '17:00', '17:10', '17:20', '17:30', '17:40', '17:50', '18:00']
+slots_list = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00',
+              '14:30',  '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00']
 
 
 class BlocklistPermission(permissions.BasePermission):
@@ -82,12 +102,12 @@ class PositionViewSet(viewsets.ModelViewSet):
 class TicketView(APIView):
     def get(self, request):
         try:
-            ticket_id = request.query_params.get('ticket_id')            
-            ticket = list(
-                Ticket.objects.filter(ticket_id=ticket_id).values(
-                    'categories_to_visit', 'time_of_request', 'assigned_to_store__location__latitude',
-                    'assigned_to_store__location__longitude', 'assigned_to_store__name','assigned_to_store__current_customers','assigned_to_store__max_customers',
-                    'assigned_to_store__location__address', 'status'))
+            ticket_id = request.query_params.get('ticket_id')
+            ticket = list(Ticket.objects.filter(ticket_id=ticket_id).values(
+                'categories_to_visit', 'time_of_request', 'assigned_to_store__location__latitude',
+                'assigned_to_store__location__longitude', 'assigned_to_store__name',
+                'assigned_to_store__current_customers', 'assigned_to_store__max_customers',
+                'assigned_to_store__location__address', 'status', 'assigned_to_store__store_id'))
             if len(ticket) != 0:
                 ticket = ticket[0]
                 content = {
@@ -97,39 +117,41 @@ class TicketView(APIView):
                     'lon': ticket['assigned_to_store__location__longitude'],
                     'address': ticket['assigned_to_store__location__address'],
                     'categories_to_visit': ticket['categories_to_visit'],
-                    'currents_customers':ticket['assigned_to_store__current_customers'],
-                    'max_customers':ticket['assigned_to_store__max_customers'],
-                    'status': ticket['status']
+                    'currents_customers': ticket['assigned_to_store__current_customers'],
+                    'max_customers': ticket['assigned_to_store__max_customers'],
+                    'status': ticket['status'],
+                    'store_id': ticket['assigned_to_store__store_id']
                 }
 
-                time_of_visit= str(ticket['time_of_request'])
+                time_of_visit = str(ticket['time_of_request'])
                 time_of_visit = time_of_visit[:19]
                 time_of_visit = datetime.strptime(time_of_visit, '%Y-%m-%d %H:%M:%S')
                 required_hours = time_of_visit.time().hour
                 required_minutes = time_of_visit.time().minute
-                temp = (required_minutes//30)*10
+                temp = (required_minutes//30)*30
                 slot_number1 = slots[str(required_hours)][str(temp)]['slot_number']
                 required_date = time_of_visit.date()
-                today= datetime.now()
+                today = datetime.now()
+
                 required_hours = today.time().hour
                 required_minutes = today.time().minute
-                temp = (required_minutes//30)*10
-                if required_hours <9 or required_hours>18:
-                    required_hours=18
-                    temp=0
+                temp = (required_minutes//30)*30
+                if required_hours < 9 or required_hours > 18:
+                    required_hours = 18
+                    temp = 0
                 slot_number2 = slots[str(required_hours)][str(temp)]['slot_number']
                 if required_date == today.date() or slot_number1 == slot_number2:
                     if content['currents_customers'] >= content['max_customers']:
-                        reason="store is full"
-                        allowed_in= False
+                        reason = "store is full"
+                        allowed_in = False
                     else:
                         reason = "you can enter and store is not full"
-                        allowed_in=True
+                        allowed_in = True
                 else:
                     reason = "you are not assigned to current slot please wait for your turn"
-                    allowed_in=False
-                content['allowed_in']=allowed_in
-                content['reason']=reason
+                    allowed_in = False
+                content['allowed_in'] = allowed_in
+                content['reason'] = reason
                 return HttpResponse(json.dumps(content), content_type="application/json", status=200)
             else:
                 return HttpResponse(json.dumps({"message": "not a valid ticket"}),
@@ -170,7 +192,8 @@ class TicketView(APIView):
                         content_type="application/json", status=400)
 
                 required_minutes = time_of_visit.time().minute
-                temp = (required_minutes//30)*10
+                temp = (required_minutes//30)*30
+
                 slot_number = slots[str(required_hours)][str(temp)]['slot_number']
                 slot_data = BookingSlot.objects.filter(
                     slot_store=store_id).filter(
@@ -233,7 +256,7 @@ class TicketView(APIView):
                     time_of_visit = ticket.time_of_request
                     required_hours = ticket.time_of_request.time().hour
                     required_minutes = ticket.time_of_request.time().minute
-                    slot_number = slots[str(required_hours)][str((required_minutes//30)*10)]['slot_number']
+                    slot_number = slots[str(required_hours)][str((required_minutes//30)*30)]['slot_number']
                     slot_store = ticket.assigned_to_store.store_id
                     ticket.delete()
                     slot_data = BookingSlot.objects.filter(
@@ -254,7 +277,6 @@ class TicketView(APIView):
             print(e)
             return HttpResponse(json.dumps({"message": "internal server error"}),
                                 content_type="application/json", status=500)
-
 
 
 class UserView(APIView):
@@ -387,6 +409,7 @@ class SlotsView(APIView):
             time_of_visit = data.get("time_of_visit")
             time_of_visit = time_of_visit[:19]
             time_of_visit = datetime.strptime(time_of_visit, '%Y-%m-%d %H:%M:%S')
+
             slot_store = data.get('store_id')
             max_customers = Store.objects.get(store_id=slot_store).max_customers
             booking_slots = BookingSlot.objects.filter(
@@ -405,9 +428,11 @@ class SlotsView(APIView):
                     json.dumps({'message': 'please choose time between 09:00  and 18:00'}),
                     content_type="application/json", status=400)
             required_minutes = time_of_visit.time().minute
-            temp = (required_minutes//30)*10
+            temp = (required_minutes//30)*30
+
             slot_number = slots[str(required_hours)][str(temp)]['slot_number']
             total_slots = total_slots[slot_number:]
+
             available_slots = list(set(total_slots).difference(filled_slots))
             if len(available_slots) != 0:
 
@@ -416,7 +441,7 @@ class SlotsView(APIView):
                     hour=int(next_available_time[0]), minute=int(next_available_time[1]))
             else:
                 next_available_slot_in_same_day = ''
-            content = {'available_slot': str(next_available_slot_in_same_day),}
+            content = {'available_slot': str(next_available_slot_in_same_day), }
             return HttpResponse(json.dumps(content), content_type="application/json", status=200)
         except Exception as e:
             print(e)
@@ -438,16 +463,16 @@ class ScanTicket(APIView):
                 user_ticket = user_ticket[0]
                 store_id = Ticket.objects.get(ticket_id=ticket_id).assigned_to_store.store_id
                 store = Store.objects.filter(store_id=store_id)
-                store_values=list(store.values())[0]
+                store_values = list(store.values())[0]
                 print(store_values)
-                if store_values['current_customers']<store_values['max_customers']:                
+                if store_values['current_customers'] < store_values['max_customers']:
                     if user_ticket['status'] == 'New':
                         ticket.update(status='Scanned')
                         ticket.update(time_of_entry=str(datetime.now()))
                         content['message'] = 'ticket successfully scanned'
                         content['ticket_status'] = 'Scanned'
                         current_customers = store_values['current_customers']
-                        store.update(current_customers=current_customers+1)                    
+                        store.update(current_customers=current_customers+1)
                         content['ticket_id'] = ticket_id
                     elif user_ticket['status'] == 'Scanned':
                         ticket.update(status='Completed')
@@ -455,12 +480,12 @@ class ScanTicket(APIView):
                         content['message'] = 'ticket successfully scanned'
                         content['ticket_status'] = 'Completed'
                         current_customers = store_values['current_customers']
-                        store.update(current_customers=current_customers-1)                    
+                        store.update(current_customers=current_customers-1)
                         content['ticket_id'] = ticket_id
                     return HttpResponse(json.dumps(content), content_type="application/json", status=200)
                 else:
                     return HttpResponse(json.dumps({"message": "store is full"}),
-                                    content_type="application/json", status=400)
+                                        content_type="application/json", status=400)
             else:
                 return HttpResponse(json.dumps({"message": "ticket not found"}),
                                     content_type="application/json", status=400)
